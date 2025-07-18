@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>KLTTS AI Clone - Chuyển Văn Bản Thành Giọng Nói Tiếng Việt</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>KLTTS AI</h1>
+      <p class="subtitle">Chuyển Văn Bản Thành Giọng Nói Tiếng Việt Miễn Phí</p>
+    </header>
+    <main>
+      <div class="form-group">
+        <label for="textInput">Nhập văn bản tiếng Việt:</label>
+        <textarea 
+          id="textInput" 
+          placeholder="Nhập văn bản để chuyển thành giọng nói tiếng Việt..." 
+          rows="6"
+        ></textarea>
+      </div>
+      
+      <div class="form-group">
+        <label for="voiceSelect">Chọn giọng nói:</label>
+        <select id="voiceSelect">
+          <option value="">Đang tải danh sách giọng nói...</option>
+        </select>
+      </div>
+      
+      <div class="form-group" id="apiKeyGroup" style="display: none;">
+        <label for="apiKeyInput">API Key ElevenLabs:</label>
+        <input type="password" id="apiKeyInput" placeholder="Nhập API Key ElevenLabs để sử dụng giọng nói chất lượng cao...">
+        <small style="color: #666; font-size: 0.85rem; margin-top: 0.25rem; display: block;">
+          💡 API Key chỉ lưu tạm trong phiên làm việc, không được gửi đến server nào khác.
+        </small>
+      </div>
+      
+      <div class="form-group">
+        <label for="speedRange">Tốc độ: <span id="speedValue">1.0x</span></label>
+        <input type="range" id="speedRange" min="0.5" max="2" step="0.1" value="1">
+      </div>
+      
+      <div class="controls">
+        <button id="speakBtn" class="speak-btn">
+          <span>▶</span> Tạo Giọng Nói
+        </button>
+        <button id="stopBtn" class="stop-btn" disabled>
+          <span>⏹</span> Dừng
+        </button>
+        <button id="downloadBtn" class="download-btn" disabled>
+          <span>⬇</span> Tải xuống MP3
+        </button>
+      </div>
+      
+      <div id="error-message" class="error-message"></div>
+      <div id="status-message" class="status-message"></div>
+    </main>
+    
+    <footer>
+      <div class="features">
+        <h3>Tính năng nổi bật:</h3>
+        <ul>
+          <li>✓ Chuyển văn bản thành giọng nói tiếng Việt tự nhiên</li>
+          <li>✓ Hỗ trợ nhiều giọng nói tiếng Việt khác nhau</li>
+          <li>✓ Điều chỉnh tốc độ phát âm linh hoạt</li>
+          <li>✓ Giao diện đơn giản, dễ sử dụng</li>
+          <li>✓ Hoàn toàn miễn phí, không cần đăng ký</li>
+          <li>✓ Tải xuống file MP3 chất lượng cao</li>
+        </ul>
+      </div>
+    </footer>
+  </div>
+  <script src="js/script.js"></script>
+</body>
+</html>

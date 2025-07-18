@@ -1,0 +1,31 @@
+{
+  "name": "kltts-ai-clone",
+  "version": "1.0.0",
+  "description": "Ứng dụng Text-to-Speech tiếng Việt với ElevenLabs và tính năng tải xuống MP3",
+  "main": "index.html",
+  "scripts": {
+    "start": "python3 -m http.server 8000",
+    "dev": "python3 -m http.server 8000",
+    "serve": "npx serve .",
+    "build": "echo 'Static site - no build needed'"
+  },
+  "keywords": [
+    "text-to-speech",
+    "vietnamese",
+    "elevenlabs",
+    "tts",
+    "mp3",
+    "download",
+    "voice"
+  ],
+  "author": "KLTTS AI Clone",
+  "license": "MIT",
+  "homepage": ".",
+  "repository": {
+    "type": "git",
+    "url": "."
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}
