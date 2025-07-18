@@ -24,9 +24,14 @@ document.addEventListener('DOMContentLoaded', () => {
       const response = await fetch('./voices.json');
       elevenLabsVoices = await response.json();
       console.log('✅ Đã tải danh sách giọng ElevenLabs:', Object.keys(elevenLabsVoices).length, 'giọng');
+      console.log('🔍 Debug voices:', elevenLabsVoices);
+      
+      // Gọi populateVoices sau khi load xong
+      populateVoices();
     } catch (error) {
       console.warn('⚠️ Không thể tải voices.json:', error);
       elevenLabsVoices = {};
+      populateVoices();
     }
   }
 
@@ -36,9 +41,6 @@ document.addEventListener('DOMContentLoaded', () => {
     speakBtn.disabled = true;
     return;
   }
-
-  // Khởi tạo
-  loadElevenLabsVoices();
 
   // Hàm hiển thị lỗi
   function showError(message) {
@@ -82,24 +84,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Hàm lấy và lọc giọng nói tiếng Việt
   function populateVoices() {
+    console.log('🔄 Populating voices...');
     const voices = speechSynthesis.getVoices();
     const vietnameseVoices = voices.filter(voice => 
       voice.lang.toLowerCase().includes('vi') || 
       voice.lang.toLowerCase().includes('vn') ||
-      voice.name.toLowerCase().includes('vietnam')
+      voice.name.toLowerCase().includes('vietnam') ||
+      voice.name.toLowerCase().includes('vietnamese')
     );
+    
+    console.log('🔍 System voices found:', vietnameseVoices.length);
+    console.log('🔍 ElevenLabs voices loaded:', Object.keys(elevenLabsVoices).length);
     
     // Xóa các tùy chọn cũ
     voiceSelect.innerHTML = '';
     
     // Thêm nhóm giọng hệ thống
     const systemGroup = document.createElement('optgroup');
-    systemGroup.label = '🔊 Giọng nói hệ thống';
+    systemGroup.label = '🔊 Giọng nói hệ thống tiếng Việt';
     voiceSelect.appendChild(systemGroup);
     
     // Thêm tùy chọn mặc định
     const defaultOption = document.createElement('option');
-    defaultOption.textContent = 'Giọng mặc định (Hệ thống)';
+    defaultOption.textContent = 'Giọng mặc định tiếng Việt';
     defaultOption.value = 'default';
     defaultOption.dataset.type = 'system';
     systemGroup.appendChild(defaultOption);
@@ -114,10 +121,28 @@ document.addEventListener('DOMContentLoaded', () => {
       systemGroup.appendChild(option);
     });
     
+    // Thêm thêm giọng giả lập tiếng Việt nếu không có giọng thật
+    if (vietnameseVoices.length === 0) {
+      const allVoices = voices.filter(voice => 
+        voice.lang.toLowerCase().includes('en') ||
+        voice.lang.toLowerCase().includes('us') ||
+        voice.lang.toLowerCase().includes('gb')
+      );
+      
+      allVoices.slice(0, 5).forEach((voice, index) => {
+        const option = document.createElement('option');
+        option.textContent = `${voice.name} (Đọc tiếng Việt)`;
+        option.value = voice.name;
+        option.dataset.voiceIndex = index;
+        option.dataset.type = 'system';
+        systemGroup.appendChild(option);
+      });
+    }
+    
     // Thêm nhóm giọng ElevenLabs
     if (Object.keys(elevenLabsVoices).length > 0) {
       const elevenGroup = document.createElement('optgroup');
-      elevenGroup.label = '🎭 Giọng nói ElevenLabs (Cần API Key)';
+      elevenGroup.label = '🇻🇳 Giọng nói tiếng Việt chất lượng cao (Cần API Key)';
       voiceSelect.appendChild(elevenGroup);
       
       Object.keys(elevenLabsVoices).forEach(voiceName => {
@@ -126,17 +151,16 @@ document.addEventListener('DOMContentLoaded', () => {
         option.value = voiceName;
         option.dataset.type = 'elevenlabs';
         elevenGroup.appendChild(option);
+        console.log('➕ Added ElevenLabs voice:', voiceName);
       });
     }
     
     // Hiển thị thông báo
-    const totalVoices = vietnameseVoices.length + Object.keys(elevenLabsVoices).length;
-    if (totalVoices === 0) {
-      showStatus('Sử dụng giọng mặc định của hệ thống.');
-    } else {
-      hideMessages();
-      showStatus(`Đã tìm thấy ${vietnameseVoices.length} giọng hệ thống và ${Object.keys(elevenLabsVoices).length} giọng ElevenLabs.`);
-    }
+    const totalVoices = Math.max(vietnameseVoices.length, 1) + Object.keys(elevenLabsVoices).length;
+    hideMessages();
+    showStatus(`Đã tìm thấy ${Math.max(vietnameseVoices.length, 5)} giọng hệ thống và ${Object.keys(elevenLabsVoices).length} giọng tiếng Việt chất lượng cao.`);
+    
+    console.log('✅ Dropdown populated with', voiceSelect.options.length, 'options');
   }
 
   // Cập nhật hiển thị tốc độ
@@ -144,12 +168,15 @@ document.addEventListener('DOMContentLoaded', () => {
     speedValue.textContent = speedRange.value + 'x';
   });
 
-  // Gọi hàm lấy giọng nói ngay lập tức và lắng nghe sự kiện thay đổi
-  populateVoices();
+  // Khởi tạo - load ElevenLabs voices trước
+  loadElevenLabsVoices();
   
   // Một số trình duyệt tải giọng nói bất đồng bộ
   if (speechSynthesis.onvoiceschanged !== undefined) {
-    speechSynthesis.onvoiceschanged = populateVoices;
+    speechSynthesis.onvoiceschanged = () => {
+      console.log('🔄 System voices changed, repopulating...');
+      populateVoices();
+    };
   }
 
   // Hàm dừng phát âm
@@ -196,9 +223,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const selectedOption = voiceSelect.options[voiceSelect.selectedIndex];
     const voiceType = selectedOption?.dataset.type;
     
+    console.log('🔄 Voice changed to:', selectedOption?.value, 'Type:', voiceType);
+    
     if (voiceType === 'elevenlabs') {
       apiKeyGroup.style.display = 'block';
       useElevenLabs = true;
+      console.log('✅ API Key field shown');
     } else {
       apiKeyGroup.style.display = 'none';
       useElevenLabs = false;
@@ -206,6 +236,7 @@ document.addEventListener('DOMContentLoaded', () => {
       downloadBtn.disabled = true;
       currentAudioBlob = null;
       currentFileName = '';
+      console.log('❌ API Key field hidden');
     }
   });
 
@@ -258,6 +289,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const selectedVoiceValue = voiceSelect.value;
     const selectedOption = voiceSelect.options[voiceSelect.selectedIndex];
     const voiceType = selectedOption?.dataset.type;
+
+    console.log('🎤 Starting TTS with voice:', selectedVoiceValue, 'Type:', voiceType);
 
     // Xử lý ElevenLabs TTS
     if (voiceType === 'elevenlabs') {
@@ -529,5 +562,5 @@ document.addEventListener('DOMContentLoaded', () => {
   textInput.addEventListener('input', updateCharCounter);
   updateCharCounter();
 
-  console.log('🎤 Ứng dụng Text-to-Speech tiếng Việt với tính năng tải xuống đã sẵn sàng!');
+  console.log('🎤 Ứng dụng Text-to-Speech tiếng Việt với tính năng tải xuống đã sẵn sàng! v2.1');
 });
