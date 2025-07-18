@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Test ElevenLabs Voices</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    .voice-item { margin: 10px 0; padding: 10px; border: 1px solid #ccc; }
+  </style>
+</head>
+<body>
+  <h1>Test ElevenLabs Voices Loading</h1>
+  <div id="voices-list"></div>
+  <div id="dropdown-test">
+    <label>Test Dropdown:</label>
+    <select id="voiceSelect">
+      <option value="">Loading...</option>
+    </select>
+  </div>
+  <div id="api-key-test" style="display: none; margin-top: 20px; padding: 10px; background: #f0f0f0;">
+    <label>API Key ElevenLabs:</label>
+    <input type="password" placeholder="Enter API Key...">
+  </div>
+
+  <script>
+    let elevenLabsVoices = {};
+    
+    // Load voices
+    async function loadVoices() {
+      try {
+        const response = await fetch('./voices.json');
+        elevenLabsVoices = await response.json();
+        console.log('✅ Loaded voices:', elevenLabsVoices);
+        
+        // Display voices
+        const voicesList = document.getElementById('voices-list');
+        voicesList.innerHTML = '<h3>Loaded Voices:</h3>';
+        Object.keys(elevenLabsVoices).forEach(voiceName => {
+          const div = document.createElement('div');
+          div.className = 'voice-item';
+          div.textContent = voiceName;
+          voicesList.appendChild(div);
+        });
+        
+        // Populate dropdown
+        const select = document.getElementById('voiceSelect');
+        select.innerHTML = '<option value="system">Giọng hệ thống</option>';
+        
+        Object.keys(elevenLabsVoices).forEach(voiceName => {
+          const option = document.createElement('option');
+          option.value = voiceName;
+          option.textContent = voiceName;
+          option.dataset.type = 'elevenlabs';
+          select.appendChild(option);
+        });
+        
+        // Add change event
+        select.addEventListener('change', () => {
+          const selectedOption = select.options[select.selectedIndex];
+          const apiKeyTest = document.getElementById('api-key-test');
+          
+          if (selectedOption.dataset.type === 'elevenlabs') {
+            apiKeyTest.style.display = 'block';
+            console.log('✅ API Key field shown for:', selectedOption.value);
+          } else {
+            apiKeyTest.style.display = 'none';
+            console.log('❌ API Key field hidden');
+          }
+        });
+        
+      } catch (error) {
+        console.error('❌ Error loading voices:', error);
+        document.getElementById('voices-list').innerHTML = '<p style="color: red;">Error loading voices: ' + error.message + '</p>';
+      }
+    }
+    
+    loadVoices();
+  </script>
+</body>
+</html>
